@@ -135,7 +135,7 @@ compare against.
 
 ## Licence
 
-This package is MIT licensed (`LICENSE`). The extension also contains the
+This package is Apache License 2.0. The extension also contains the
 basis_universal transcoder under the Apache License 2.0
 (`vendor/basis_universal/LICENSE`, `vendor/basis_universal/NOTICE`) and the
 Zstandard decoder under the BSD licence (`vendor/basis_universal/zstd/LICENSE`).
