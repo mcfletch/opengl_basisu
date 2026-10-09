@@ -1,0 +1,27 @@
+opengl_basisu
+Copyright (c) 2026 Mike C. Fletcher and Contributors
+Licensed under the MIT License; see LICENSE.
+
+The compiled extension contains third-party code, copied unmodified into
+vendor/basis_universal from basis_universal, tag v2_50
+(commit 9bebe16726b3a61c8c213eeee3b7cffb462ef34e,
+https://github.com/BinomialLLC/basis_universal):
+
+* The Basis Universal transcoder (vendor/basis_universal/transcoder).
+  Licensed under the Apache License, Version 2.0; see
+  vendor/basis_universal/LICENSE. Its attribution notice, reproduced as
+  Apache 2.0 section 4(d) requires:
+
+    Basis Universal(TM) Supercompressed GPU Texture Compression Library
+    Copyright (c) 2016-2026 Binomial LLC.
+    All rights reserved except as granted under the Apache 2.0 license.
+    "Basis Universal" is a trademark of Binomial LLC.
+
+  The full notice is vendor/basis_universal/NOTICE.
+
+* The Zstandard single-file decoder (vendor/basis_universal/zstd).
+  Copyright (c) Meta Platforms, Inc. and affiliates. Zstandard is offered
+  under a choice of the BSD license or the GPLv2; this package takes it under
+  the BSD license in vendor/basis_universal/zstd/LICENSE.
+
+No basis_universal encoder code is included.

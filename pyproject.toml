@@ -1,0 +1,173 @@
+[build-system]
+# The transcoder is a C++ extension with no pure-Python equivalent, so Cython
+# and a C++17 compiler are needed for every source build. NumPy is not needed to
+# build: the binding takes a typed memoryview, which is the buffer protocol.
+requires = ["setuptools>=77", "wheel", "Cython>=3.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "opengl_basisu"
+# Read from src/opengl_basisu/__init__.py -- see [tool.setuptools.dynamic].
+# .github/workflows/release.yml decides whether to publish by reading
+# `__version__`, so there is one definition of it.
+dynamic = ["version"]
+description = "Basis Universal KTX 2 and .basis transcoding to GPU texture formats, as NumPy arrays"
+readme = "README.md"
+# This project's own code is MIT. The compiled extension also carries the
+# basis_universal transcoder (Apache-2.0) and the Zstandard decoder (BSD-3-Clause).
+license = "MIT AND Apache-2.0 AND BSD-3-Clause"
+license-files = [
+    "LICENSE",
+    "NOTICE",
+    "vendor/basis_universal/LICENSE",
+    "vendor/basis_universal/NOTICE",
+    "vendor/basis_universal/zstd/LICENSE",
+]
+requires-python = ">=3.10"
+authors = [
+    { name = "Mike C. Fletcher", email = "mcfletch@vrplumber.com" }
+]
+keywords = [
+    "basis", "basisu", "ktx2", "KHR_texture_basisu", "etc1s", "uastc",
+    "texture", "compression", "glTF", "numpy", "BC7", "ASTC",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: C++",
+    "Topic :: Multimedia :: Graphics :: 3D Rendering",
+    "Topic :: Multimedia :: Graphics :: Graphics Conversion",
+]
+
+dependencies = [
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+dev = [
+    "opengl_basisu[test]",
+    "mypy",
+    "ruff",
+    "tox>=4.0",
+    "Cython>=3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mcfletch/opengl_basisu"
+Repository = "https://github.com/mcfletch/opengl_basisu"
+
+[tool.setuptools.dynamic]
+version = {attr = "opengl_basisu.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+# The Cython source and the shim ship so a source install can rebuild; the stub
+# types the compiled module for a caller's mypy.
+opengl_basisu = ["py.typed", "*.pyx", "*.pyi", "*.hpp"]
+
+[tool.setuptools.exclude-package-data]
+# Cython's generated C++ is rebuilt from the .pyx; the sdist carries it, the
+# wheel does not.
+opengl_basisu = ["*.cpp"]
+
+[tool.pytest.ini_options]
+# ``src`` is on testpaths so that the worked examples in the module docstrings
+# are run. ``importlib`` import mode lets doctest run against a checkout whose
+# package is also installed non-editably.
+testpaths = ["tests", "src"]
+addopts = "-ra --doctest-modules --import-mode=importlib"
+# `tests/samples.py` (the fixture files and their colours) and `tests/blocks.py`
+# (reference block decoders) are imported by name, and the importlib import
+# mode does not put a test file's directory on `sys.path`.
+pythonpath = ["tests"]
+
+[tool.openglcontext-checks]
+# The OGC rules (openglcontext-checks) this project is clean of, held by the
+# workspace preflight.
+select = ["OGC121", "OGC131", "OGC141", "OGC221", "OGC222", "OGC223"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = ["vendor"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F", "B",
+    "ARG",  # unused arguments
+    "I",    # import order
+    "UP",   # constructs superseded by the minimum Python
+    "SIM",  # simplifications
+    "C4",   # comprehensions
+    "RUF",
+    "PGH003", "PGH004",  # a type: ignore or noqa names the codes it silences
+    "PLE0604", "PLE0605",  # __all__ is a list or tuple of strings
+    "S110", "S112", "TRY400",  # an error that is caught is not silently dropped
+    "DTZ",  # datetimes carry a timezone
+    "S102", "S202", "S301", "S307",  # no exec, eval, pickle or unchecked tar extraction
+    "BLE001",  # a bare `except Exception` is a boundary that says why
+    "S310",  # a URL is opened only once its scheme is known
+    "PLC0415",  # imports at the top of a module
+    "SLF001",  # a private name is reached only by a white-box test that says why
+]
+ignore = [
+    "E501",   # line too long: held by the formatter's line-length, above
+    "E741",   # ambiguous variable name
+    "RUF005", # concatenation is clearer than unpacking for short literal joins
+    # Diagnostics use ``%`` formatting throughout: house style across the stack.
+    "UP031",
+    # ``__all__`` is grouped by what each name is for, with a comment per group.
+    "RUF022",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# A test that pins an error signature calls the thing that raises, and
+# `pytest.raises` is the assertion, so its result is unused.
+"tests/*" = ["ARG001", "ARG002"]
+
+[tool.ruff.format]
+quote-style = "single"
+exclude = ["*.md", "vendor"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_unused_ignores = true
+ignore_missing_imports = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+# NumPy's stubs type array arithmetic as ``Any``.
+warn_return_any = false
+
+[tool.cibuildwheel]
+# Stable CPython only. Free-threaded builds (`cp313t`, `cp314t`) are not
+# produced: `cp314-*` does not match `cp314t-*`.
+build = "cp310-* cp311-* cp312-* cp313-* cp314-*"
+skip = "*-musllinux_i686 *_i686"
+build-frontend = "build"
+test-requires = "pytest numpy"
+test-command = "pytest -q {project}/tests -o addopts="
+
+# uv judges whether its cached metadata for a source tree is current from
+# pyproject.toml alone unless told otherwise. The version lives in __init__.py,
+# and the extension is rebuilt when its sources change.
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "setup.py" },
+    { file = "src/opengl_basisu/__init__.py" },
+    { file = "src/opengl_basisu/_transcoder.pyx" },
+    { file = "src/opengl_basisu/_shim.hpp" },
+]

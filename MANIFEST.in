@@ -1,0 +1,11 @@
+# The vendored transcoder is compiled by every source build, so the sdist
+# carries all of it, with its licence and notice files.
+graft vendor
+include NOTICE
+include tox.ini
+include CHANGELOG.md
+recursive-include docs *.md
+recursive-include tests *.py
+recursive-include tests/fixtures *.ktx2 *.basis *.json
+recursive-include tools *.py
+include src/opengl_basisu/_shim.hpp
