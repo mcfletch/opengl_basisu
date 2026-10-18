@@ -24,7 +24,7 @@ from opengl_basisu.errors import BasisuError, UnsupportedError
 from opengl_basisu.targets import Codec, Target, TargetFormat, choose_target, preferences
 from opengl_basisu.texture import Image, Texture, container_of, open
 
-__version__ = '0.1.0a1'
+__version__ = '0.1.0a2'
 
 # The basis_universal release the extension is compiled from; the commit is in
 # vendor/basis_universal/VERSION.
